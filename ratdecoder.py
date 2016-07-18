@@ -9,6 +9,7 @@ import tempfile
 from optparse import OptionParser
 
 from decoders import JavaDropper
+import json
 
 __description__ = 'RAT Config Extractor'
 __author__ = 'Kevin Breen, https://techanarchy.net, https://malwareconfig.com'
@@ -22,9 +23,9 @@ def unpack(raw_data):
     f.write(raw_data)
     f.close()
     try:
-        subprocess.call("(upx -d %s)" %f.name, shell=True)
+        subprocess.call("(upx -d %s > /dev/null)" %f.name, shell=True)
     except Exception as e:
-        print 'UPX Error {0}'.format(e)
+        print >> sys.stderr, 'UPX Error {0}'.format(e)
         return
     new_data = open(f.name, 'rb').read()
     os.unlink(f.name)
@@ -46,8 +47,8 @@ def run(raw_data):
     md5 = hashlib.md5(raw_data).hexdigest()
     sha256 = hashlib.sha256(raw_data).hexdigest()
 
-    print "   [-] MD5: {0}".format(md5)
-    print "   [-] SHA256: {0}".format(sha256)
+    print >> sys.stderr, "   [-] MD5: {0}".format(md5)
+    print >> sys.stderr, "   [-] SHA256: {0}".format(sha256)
 
     # Yara Scan
     family = yara_scan(raw_data)
@@ -56,60 +57,69 @@ def run(raw_data):
 
     # UPX Check and unpack
     if family == 'UPX':
-        print "  [!] Found UPX Packed sample, Attempting to unpack"
+        print >> sys.stderr, "  [!] Found UPX Packed sample, Attempting to unpack"
         raw_data = unpack(raw_data)
         family = yara_scan(raw_data)
 
         if family == 'UPX':
             # Failed to unpack
-            print "  [!] Failed to unpack UPX"
+            print >> sys.stderr, "  [!] Failed to unpack UPX"
             return
 
     # Java Dropper Check
     if family == 'JavaDropper':
-        print "  [!] Found Java Dropped, attemping to unpack"
+        print >> sys.stderr, "  [!] Found Java Dropped, attemping to unpack"
         raw_data = JavaDropper.run(raw_data)
         family = yara_scan(raw_data)
 
         if family == 'JavaDropper':
-            print "  [!] Failed to unpack JavaDropper"
+            print >> sys.stderr, "  [!] Failed to unpack JavaDropper"
             return
 
     if not family:
-        print "    [!] Unabel to match your sample to a decoder"
+        print >> sys.stderr, "    [!] Unabel to match your sample to a decoder"
         return
 
     # Import decoder
     try:
         module = importlib.import_module('decoders.{0}'.format(family))
-        print "[+] Importing Decoder: {0}".format(family)
+        print >> sys.stderr, "[+] Importing Decoder: {0}".format(family)
     except ImportError:
-        print '    [!] Unable to import decoder {0}'.format(family)
+        print >> sys.stderr, '    [!] Unable to import decoder {0}'.format(family)
         return
 
     # Get config data
     try:
         config_data = module.config(raw_data)
     except Exception as e:
-        print 'Conf Data error with {0}. Due to {1}'.format(family, e)
+        print >> sys.stderr, 'Conf Data error with {0}. Due to {1}'.format(family, e)
         return ['Error', 'Error Parsing Config']
 
     return config_data
 
 
-def print_output(config_dict, output):
+
+
+def print_output(config_dict, output, format='json'):
     if output:
         with open(output, 'a') as out:
-            print "    [+] Printing Config to Output"
-            for key, value in sorted(config_dict.iteritems()):
-                out.write("       [-] Key: {0}\t Value: {1}".format(key,value))
-            out.write('*'*20)
-            print "    [+] End of Config"
+            if format == 'json':
+                json.dumps(config_dict, out, sort_keys=True, indent=4, separators=(',', ': '))
+            else:
+                print >> sys.stderr, "    [+] Printing Config to Output"
+                for key, value in sorted(config_dict.iteritems()):
+                    out.write("       [-] Key: {0}\t Value: {1}".format(key,value))
+                out.write('*'*20)
+                print >> sys.stderr, "    [+] End of Config"
     else:
-        print "[+] Printing Config to screen"
-        for key, value in sorted(config_dict.iteritems()):
-            print "   [-] Key: {0}\t Value: {1}".format(key,value)
-        print "[+] End of Config"
+        if format == 'json':
+            print json.dumps(config_dict, sort_keys=True, indent=4, separators=(',', ': '))
+        else:
+            print >> sys.stderr, "[+] Printing Config to screen"        
+            for key, value in sorted(config_dict.iteritems()):
+                print >> sys.stderr, "   [-] Key: {0}\t Value: {1}".format(key,value)
+            print >> sys.stderr, "[+] End of Config"
+
 
 
 
@@ -123,14 +133,14 @@ if __name__ == "__main__":
 
     # Print list
     if options.list:
-        print "[+] Listing Available Decoders"
+        print >> sys.stderr, "[+] Listing Available Decoders"
         for filename in os.listdir('decoders'):
-            print "  [-] {0}".format(filename)
+            print >> sys.stderr, "  [-] {0}".format(filename)
         sys.exit()
 
     # We need at least one arg
     if len(args) < 1:
-        print "[!] Not enough Arguments, Need at least file path"
+        print >> sys.stderr, "[!] Not enough Arguments, Need at least file path"
         parser.print_help()
         sys.exit()
 
@@ -140,23 +150,23 @@ if __name__ == "__main__":
 
     if options.recursive:
         if not is_dir:
-            print "[!] Recursive requires a directory not a file"
+            print >> sys.stderr, "[!] Recursive requires a directory not a file"
             sys.exit()
 
         # Read all the things
         for filename in os.listdir(args[0]):
             file_data = open(os.path.join(args[0], filename), 'rb').read()
-            print "[+] Reading {0}".format(filename)
+            print >> sys.stderr, "[+] Reading {0}".format(filename)
             config_data = run(file_data)
 
     else:
         if not is_file:
-            print "[!] You did not provide a valid file."
+            print >> sys.stderr, "[!] You did not provide a valid file."
             sys.exit()
 
         # Read in the file.
         file_data = open(os.path.join(args[0], args[0]), 'rb').read()
-        print "[+] Reading {0}".format(args[0])
+        print >> sys.stderr, "[+] Reading {0}".format(args[0])
         config_data = run(file_data)
         print_output(config_data, options.output)
 
