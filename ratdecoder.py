@@ -15,8 +15,7 @@ __description__ = 'RAT Config Extractor'
 __author__ = 'Kevin Breen, https://techanarchy.net, https://malwareconfig.com'
 __version__ = '1.0'
 __date__ = '2016/04'
-rule_file = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'yaraRules', 'yaraRules.yar')
-
+rule_file = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'yaraRules', 'yaraRules.yar')
 
 def unpack(raw_data):
     f = tempfile.NamedTemporaryFile(delete=False)
