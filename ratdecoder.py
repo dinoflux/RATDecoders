@@ -41,7 +41,7 @@ def yara_scan(raw_data):
         return
 
 
-def run(raw_data):
+def run(raw_data, src_file_path=None):
     # Get some hashes
     md5 = hashlib.md5(raw_data).hexdigest()
     sha256 = hashlib.sha256(raw_data).hexdigest()
@@ -51,7 +51,6 @@ def run(raw_data):
 
     # Yara Scan
     family = yara_scan(raw_data)
-
 
 
     # UPX Check and unpack
@@ -89,10 +88,24 @@ def run(raw_data):
 
     # Get config data
     try:
-        config_data = module.config(raw_data)
+        # csandoval changes: AlienSpy support.
+        # print 'Family:', family
+        if family == 'AlienSpy':
+            config_data = module.config(src_file_path)
+        else:
+            config_data = module.config(raw_data)
+        # csandoval end changes.
     except Exception as e:
         print >> sys.stderr, 'Conf Data error with {0}. Due to {1}'.format(family, e)
         return ['Error', 'Error Parsing Config']
+
+    # csandoval changes: Parser data
+    # print 'Config Data:', config_data
+    if isinstance(config_data, dict):
+        for key, value in config_data.iteritems():
+            #print value, type(value)
+            config_data[key] = value.decode('UTF-8', errors='replace')
+    # csandoval end changes.
 
     return config_data
 
@@ -166,7 +179,7 @@ if __name__ == "__main__":
         # Read in the file.
         file_data = open(os.path.join(args[0], args[0]), 'rb').read()
         print >> sys.stderr, "[+] Reading {0}".format(args[0])
-        config_data = run(file_data)
+        config_data = run(file_data, args[0])
         print_output(config_data, options.output)
 
 
