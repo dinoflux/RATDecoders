@@ -177,6 +177,7 @@ def xor_config(data):
     for line in raw_config.split('\n'):
         if line.startswith('<entry key'):
             config_dict[re.findall('key="(.*?)"', line)[0]] = re.findall('>(.*?)</entry', line)[0]
+    print config_dict
     return config_dict
 
 def run(file_name):
@@ -300,3 +301,11 @@ def run(file_name):
         config_dict = version_d(enckey, coded_jar)
 
     return config_dict
+
+
+def config(file_name):
+    config = run(file_name)
+    for key, value in config.iteritems():
+        clean_value = string_print(value)
+        config[key] = clean_value
+    return config
