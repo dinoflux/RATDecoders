@@ -75,7 +75,7 @@ def run(raw_data, src_file_path=None):
             return
 
     if not family:
-        print >> sys.stderr, "    [!] Unabel to match your sample to a decoder"
+        print >> sys.stderr, "    [!] Unable to match your sample to a decoder"
         return
 
     # Import decoder
