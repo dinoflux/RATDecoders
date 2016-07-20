@@ -1,4 +1,5 @@
 import pype32
+import sys
 from base64 import b64decode
 from Crypto.Cipher import AES
 from pbkdf2 import PBKDF2
@@ -65,15 +66,15 @@ def get_strings(pe, dir_type):
 def get_version(string_list):
     # Pred v12
     if 'Predator Pain v12 - Server Ran - [' in string_list:
-        print "    [-] Found Predator Pain v12"
+        print >> sys.stderr, "    [-] Found Predator Pain v12"
         return 'v12'
     # Pred v13
     elif 'Predator Pain v13 - Server Ran - [' in string_list:
-        print "    [-] Found Predator Pain v13"
+        print >> sys.stderr, "    [-] Found Predator Pain v13"
         return 'v13'
     # Pred v14
     elif 'EncryptedCredentials' in string_list:
-        print "    [-] Found Predator Pain v14"
+        print >> sys.stderr, "    [-] Found Predator Pain v14"
         return 'v14'
     else:
         return

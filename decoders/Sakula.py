@@ -1,4 +1,5 @@
 import re
+import sys
 from Crypto.Cipher import XOR
 from struct import unpack
 
@@ -57,7 +58,7 @@ def config(file_data):
     
     for c in config_list:
         if any(".exe" in s for s in c):
-            print "Found Version < 1.3"
+            print >> sys.stderr, "Found Version < 1.3"
             configs = config_v1(config_list)
 
     
@@ -68,7 +69,7 @@ def config(file_data):
 
     for c in config_list:
         if any(".exe" in s for s in c):
-            print "Found Version > 1.2"
+            print >> sys.stderr, "Found Version > 1.2"
             configs = config_v2(config_list)
 
     if configs:

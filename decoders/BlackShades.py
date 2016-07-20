@@ -34,7 +34,7 @@ def decrypt_configuration(hex):
 
 def config_extract(raw_data):
     config_pattern = re.findall('[0-9a-fA-F]{154,}', raw_data)
-    for s in config_pattern:
+    for s in reversed(config_pattern):
         if (len(s) % 2) == 1:
             s = s[:-1]
         return s

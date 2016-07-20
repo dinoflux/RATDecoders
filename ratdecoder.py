@@ -84,7 +84,7 @@ def run(raw_data, src_file_path=None):
         print >> sys.stderr, "[+] Importing Decoder: {0}".format(family)
     except ImportError:
         print >> sys.stderr, '    [!] Unable to import decoder {0}'.format(family)
-        return
+        return { 'family': family, 'config': {'Error': 'Not supported'} }
 
     # Get config data
     try:
@@ -104,10 +104,12 @@ def run(raw_data, src_file_path=None):
     if isinstance(config_data, dict):
         for key, value in config_data.iteritems():
             #print value, type(value)
-            config_data[key] = value.decode('UTF-8', errors='replace')
+            if isinstance(value, str):
+                config_data[key] = value.decode('UTF-8', errors='replace')
     # csandoval end changes.
 
-    return config_data
+    result_data = { 'family': family, 'config': config_data }
+    return result_data
 
 
 
