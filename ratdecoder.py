@@ -96,6 +96,7 @@ def run(raw_data, src_file_path=None):
             config_data = module.config(raw_data)
         # csandoval end changes.
     except Exception as e:
+        raise
         print >> sys.stderr, 'Conf Data error with {0}. Due to {1}'.format(family, e)
         return ['Error', 'Error Parsing Config']
 

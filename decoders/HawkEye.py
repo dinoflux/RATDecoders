@@ -13,7 +13,7 @@ def config(raw_data):
         config_dict = config_1(key, salt, string_list)
         return config_dict
     except Exception as e:
-        return False
+        return {'Config String': 'False' }
 
 #Helper Functions Go Here
 

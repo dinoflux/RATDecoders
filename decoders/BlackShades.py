@@ -41,24 +41,27 @@ def config_extract(raw_data):
 
 def config_parser(config):
     config_dict = {}
-    config_dict['Domain'] = config[1]
-    config_dict['Client Control Port'] = config[2]
-    config_dict['Client Transfer Port'] = config[3]
-    config_dict['Campaign ID'] = config[4]
-    config_dict['File Name'] = config[5]
-    config_dict['Install Path'] = config[6]
-    config_dict['Registry Key'] = config[7]
-    config_dict['ActiveX Key'] = config[8]
-    config_dict['Install Flag'] = config[9]
-    config_dict['Hide File'] = config[10]
-    config_dict['Melt File'] = config[11]
-    config_dict['Delay'] = config[12]
-    config_dict['USB Spread'] = config[13]
-    config_dict['Mutex'] = config[14]
-    config_dict['Log File'] = config[15]
-    config_dict['Folder Name'] = config[16]
-    config_dict['Smart DNS'] = config[17]
-    config_dict['Protect Process'] = config[18]
+    try:
+        config_dict['Domain'] = config[1]
+        config_dict['Client Control Port'] = config[2]
+        config_dict['Client Transfer Port'] = config[3]
+        config_dict['Campaign ID'] = config[4]
+        config_dict['File Name'] = config[5]
+        config_dict['Install Path'] = config[6]
+        config_dict['Registry Key'] = config[7]
+        config_dict['ActiveX Key'] = config[8]
+        config_dict['Install Flag'] = config[9]
+        config_dict['Hide File'] = config[10]
+        config_dict['Melt File'] = config[11]
+        config_dict['Delay'] = config[12]
+        config_dict['USB Spread'] = config[13]
+        config_dict['Mutex'] = config[14]
+        config_dict['Log File'] = config[15]
+        config_dict['Folder Name'] = config[16]
+        config_dict['Smart DNS'] = config[17]
+        config_dict['Protect Process'] = config[18]
+    except Exception as e:
+        pass
     return config_dict
         
 def config(data):
