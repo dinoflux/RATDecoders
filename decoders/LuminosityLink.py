@@ -8,16 +8,10 @@ def config(raw_data):
         re_pattern = '[a-zA-Z0-9+/]{60,}={0,2}'
         conf_string = re.findall(re_pattern, raw_data)[0]
         decoded = decrypt_string('Specify a Password', conf_string)
-        config_dict = parse_config(decoded.split('|'))
-        
-        if config_dict["BackUp Domain"] == 'Disabled':
-            return [config_dict, [config_dict["Domain"]]]
-        else:
-            return config_dict
-            
+        config_dict = parse_config(decoded.split('|'))    
     except Exception as e:
         return False
-        
+    return config_dict
         
 #Helper Functions Go Here
 def decrypt_string(key_string, coded):
