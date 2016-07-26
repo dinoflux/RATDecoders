@@ -124,7 +124,6 @@ def config(data):
         two = walk_data(one)
         # Let's Process this and format the config.
         final_config = extract_config(two)
-        domain_data = domain_parse(final_config)
-        return [final_config, domain_data]
     except:
         return None
+    return final_config
