@@ -2,6 +2,7 @@
 import zlib
 import string
 import hashlib
+import sys
 from zipfile import ZipFile
 from cStringIO import StringIO
 from base64 import b64decode
@@ -48,10 +49,10 @@ def parse_stub(drop):
     for key in keys:
         decoded = decrypt_AES(key, drop)
         if 'META-INF' in decoded:
-            print "Found Embedded Jar"
+            print >> sys.stderr, "Found Embedded Jar"
             return decoded
         if 'Program' in decoded:
-            print "Found Embedded EXE"
+            print >> sys.stderr, "Found Embedded EXE"
             return decoded
 
 def parse_xor(key, drop):
@@ -67,24 +68,24 @@ def run(raw_data):
     jar = ZipFile(jar_data, 'r')
 
     if 'e' and 'k' in jar.namelist():
-        print "Found EK Dropper"
+        print >> sys.stderr, "Found EK Dropper"
         key = jar.read('k')
         drop = jar.read('e')
         decoded = parse_ek(key, drop)
 
     if 'config.ini' and 'password.ini' in jar.namelist():
-        print "Found LoadStub Dropper"
+        print >> sys.stderr, "Found LoadStub Dropper"
         key = jar.read('password.ini')
         drop = jar.read('config.ini')
         decoded = parse_load(key, drop)
 
     if 'stub/stub.dll' in jar.namelist():
-        print "Found Stub Dropper"
+        print >> sys.stderr, "Found Stub Dropper"
         drop = jar.read('stub/stub.dll')
         decoded = parse_stub(drop)
 
     if 'c.dat' in jar.namelist():
-        print "Found XOR Dropper"
+        print >> sys.stderr, "Found XOR Dropper"
         key_file = b64decode(jar.read('c.dat'))
         key_text = decrypt_XOR('\xdd', key_file)
         drop_file = key_text.split('\n')[1]
@@ -96,6 +97,6 @@ def run(raw_data):
     if decoded:
         return decoded
     else:
-        print "Unable to decode"
+        print >> sys.stderr, "Unable to decode"
 
 

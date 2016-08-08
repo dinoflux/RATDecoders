@@ -10,9 +10,9 @@ def config(raw_data):
         if config_dict:
             return config_dict
         else:
-            return False
+            return {'Data': 'False' }
     except Exception as e:
-        return False
+        return {'Data': 'False' }
         
 #Helper Functions Go Here
 

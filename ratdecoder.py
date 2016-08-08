@@ -33,6 +33,8 @@ def unpack(raw_data):
 
 # Yara Scanner Returns the Rule Name
 def yara_scan(raw_data):
+    if raw_data is None:
+        return
     yara_rules = yara.compile(rule_file)
     matches = yara_rules.match(data=raw_data)
     if len(matches) > 0:
@@ -55,27 +57,27 @@ def run(raw_data, src_file_path=None):
 
     # UPX Check and unpack
     if family == 'UPX':
-        print >> sys.stderr, "  [!] Found UPX Packed sample, Attempting to unpack"
+        print >> sys.stderr, "   [!] Found UPX Packed sample, Attempting to unpack"
         raw_data = unpack(raw_data)
         family = yara_scan(raw_data)
 
         if family == 'UPX':
             # Failed to unpack
-            print >> sys.stderr, "  [!] Failed to unpack UPX"
+            print >> sys.stderr, "   [!] Failed to unpack UPX"
             return
 
     # Java Dropper Check
     if family == 'JavaDropper':
-        print >> sys.stderr, "  [!] Found Java Dropped, attemping to unpack"
+        print >> sys.stderr, "   [!] Found Java Dropped, attemping to unpack"
         raw_data = JavaDropper.run(raw_data)
         family = yara_scan(raw_data)
 
         if family == 'JavaDropper':
-            print >> sys.stderr, "  [!] Failed to unpack JavaDropper"
+            print >> sys.stderr, "   [!] Failed to unpack JavaDropper"
             return
 
     if not family:
-        print >> sys.stderr, "    [!] Unable to match your sample to a decoder"
+        print >> sys.stderr, "   [!] Unable to match your sample to a decoder"
         return
 
     # Import decoder
