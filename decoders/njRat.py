@@ -1,10 +1,13 @@
-import pype32
 import base64
-
+import pype32
+import sys
 
 def config(raw_data):
     try:
+        savesdtout = sys.stdout
+        sys.stdout = sys.stderr
         pe = pype32.PE(data=raw_data)
+        sys.stdout = savesdtout
         string_list = get_strings(pe, 2)
         config_dict = parse_config(string_list)
         if config_dict:
@@ -20,14 +23,18 @@ def config(raw_data):
 def get_strings(pe, dir_type):
     string_list = []
     m = pe.ntHeaders.optionalHeader.dataDirectory[14].info
-    for s in m.netMetaDataStreams[dir_type].info:
-        for offset, value in s.iteritems():
-            string_list.append(value)
+    if m:
+        for s in m.netMetaDataStreams[dir_type].info:
+            for offset, value in s.iteritems():
+                string_list.append(value)
     return string_list
             
 #Turn the strings in to a python dict
 def parse_config(string_list):
     config_dict = {}
+    if len(string_list) == 0:
+        return config_dict
+
     if string_list[5] == '0.3.5':
         config_dict["Campaign ID"] = base64.b64decode(string_list[4])
         config_dict["version"] = string_list[5]
